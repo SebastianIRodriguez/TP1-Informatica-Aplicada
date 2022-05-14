@@ -62,6 +62,9 @@ int main(void) {
     char c;
     bool valido = false;
     char enter;
+    int c_eventos;
+
+    printf("\n\n\tBienvenido a la simulacion de fabrica de velas\n\n");
 
     while(continuar){
         srand(time(NULL));
@@ -70,11 +73,18 @@ int main(void) {
         lista->s1 = 0;
         lista->s2 = 0;
         lista->sig = NULL;
-        for(int i = 0; i < 20; i++)
+
+        printf("Ingrese la cantidad de eventos aleatorios que desea crear: ");
+
+        scanf("%d",&c_eventos);
+        scanf("%c",&enter); // se come el \n
+
+        for(int i = 0; i < c_eventos; i++)
             agregarEvento(lista);
 
         imprimir_lista(lista);
 
+        // Una vez mostrada realizada la simulación, se libera la memoria
 		liberar_memoria(lista);
 
         valido = false;
