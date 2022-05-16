@@ -1,10 +1,7 @@
 /*
  ============================================================================
  Name        : TP1-Informatica-Aplicada.c
- Author      :
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
+ Author      : Leonel Lingotti - Luciano Raffagnini - Sebastian Ignacio Rodriguez
  ============================================================================
  */
 
@@ -32,56 +29,56 @@ typedef enum
     BAJA_VELOCIDAD_ENSANCHADO,
 } Estado;
 
-void agregarEvento(Evento *lista)
-{
-    Evento *nuevo_evento = malloc(sizeof(Evento));
-    nuevo_evento->s1 = rand() % 2;
-    nuevo_evento->s2 = rand() % 2;
-    nuevo_evento->sig = NULL;
-
-    Evento *p = lista;
-    while (p->sig != NULL)
-    {
-        p = p->sig;
-    }
-    p->sig = nuevo_evento;
-}
-
 void imprimir_lista(Evento *lista)
 {
+    /**
+    * Imprime la lista de eventos generados con los valores de los sensores asociados a cada evento.
+    **/
     Evento *p = lista;
     while (p->sig != NULL)
     {
         printf("S1:%d S2:%d\n", p->s1, p->s2);
         p = p->sig;
     }
+    printf("S1:%d S2:%d\n", p->s1, p->s2);
 }
 
 void liberar_memoria(Evento *evento)
 {
-    if (evento->sig == NULL)
-    {
-        free(evento);
-    }
-    else
+    /*
+     * Función recursiva que toma como parámetro un puntero a un evento de la lista,
+     * si no es el último se llama a si misma pasando como parámetro el puntero al próximo elemento.
+     * De esta forma se va liberando la memoria desde el ultimo elemento al primero.
+     */
+
+    if (evento->sig != NULL)
     {
         liberar_memoria(evento->sig);
     }
+    free(evento);
 }
 
 void correr_simulacion(Evento *eventos)
 {
-    // De movida, S1 y S2 son 0 en el primer evento
+    /**
+        Funcion que itera hasta recibir una entrada valida S o N.
+
+        Si se ingresa S, se repetira la simulacion.
+        Si se ingresa N, se finaliza la ejecucion del programa.
+
+        recibir_entrada() retorna el caracter 'S' o 'N' ingresado.
+    **/
     Evento *p = eventos;
     Estado estado_actual = ALTA_VELOCIDAD;
 
     while (p->sig != NULL)
     {
+        // Se detecta vela
         if (p->s1 == 1 && p->s2 == 0 && estado_actual == ALTA_VELOCIDAD)
         {
             estado_actual = BAJA_VELOCIDAD;
         }
-
+        // Hay que ensanchar la vela
         else if (estado_actual == BAJA_VELOCIDAD && p->s1 == 0 && p->s2 == 0)
         {
             estado_actual = DETENIDO_ENSANCHANDO;
@@ -91,20 +88,21 @@ void correr_simulacion(Evento *eventos)
         {
             estado_actual = BAJA_VELOCIDAD_ENSANCHADO;
         }
-
+        // Se terminó de ensanchar la vela
         else if (estado_actual == DETENIDO_ENSANCHANDO && p->s1 == 1 && p->s2 == 1)
         {
             estado_actual = BAJA_VELOCIDAD_ENSANCHADO;
         }
-
+        // La vela salió del proceso
         else if (p->s1 == 0 && p->s2 == 0 && estado_actual == BAJA_VELOCIDAD_ENSANCHADO)
         {
             // Cortar la simulacion
-            printf("Fin de la simulacion. La vela llego al final de la cinta\n");
+            printf("La vela llego al final de la cinta\n");
             break;
         }
         else
         {
+            // Estado imposible o irrelevante
             p = p->sig;
             continue;
         }
@@ -142,66 +140,89 @@ void correr_simulacion(Evento *eventos)
 
         p = p->sig;
     }
+    printf("Fin de la simulacion\n\n");
+}
+
+char recibir_entrada()
+{
+    /**
+        Funcion que itera hasta recibir una entrada valida S o N.
+
+        Si se ingresa S, se repetira la simulacion.
+        Si se ingresa N, se finaliza la ejecucion del programa.
+
+        recibir_entrada() retorna el caracter 'S' o 'N' ingresado.
+    **/
+    char c;
+    while (true)
+    {
+        printf("Ingrese su respuesta (S/N): ");
+        scanf("%c", &c);
+        getchar();
+
+        c = toupper(c);
+
+        if (c == 'N' || c == 'S')
+        {
+            return c;
+        }
+        else
+        {
+            printf("Opcion invalida, intente otra vez:\n");
+        }
+    }
+}
+
+Evento *crear_lista_eventos(int cantidad)
+{
+    /**
+    Crea una lista de eventos del largo adecuado, con informacion generada en forma aleatoria, en forma recursiva
+    **/
+    Evento *lista = malloc(sizeof(Evento));
+    lista->s1 = rand() % 2;
+    lista->s2 = rand() % 2;
+    lista->sig = (cantidad > 1) ? crear_lista_eventos(cantidad - 1) : NULL;
+    return lista;
 }
 
 int main(void)
 {
-    bool continuar = true;
-    char c;
-    bool valido = false;
-    char enter;
     int c_eventos;
+    bool imprimir = false;
+
+    // Utilizar diferente semilla en cada llamada a rand()
+    srand(time(NULL));
 
     printf("\n\n\tBienvenido a la simulacion de fabrica de velas\n\n");
+    printf("  Desea ver las listas de eventos aleaotorios que se generen? \n  Aplica a todas las simulaciones\n\n");
 
-    while (continuar)
+    if (recibir_entrada() == 'S')
     {
-        srand(time(NULL));
-        Evento *lista = malloc(sizeof(Evento));
-        lista->s1 = 0;
-        lista->s2 = 0;
-        lista->sig = NULL;
+        imprimir = true;
+    }
 
+    while (true)
+    {
         printf("Ingrese la cantidad de eventos aleatorios que desea crear: ");
 
+        // Leemos la cantidad de eventos
         scanf("%d", &c_eventos);
-        scanf("%c", &enter); // se come el \n
+        getchar(); // Descarta el \n
 
-        for (int i = 0; i < c_eventos; i++)
-            agregarEvento(lista);
+        Evento *lista = crear_lista_eventos(c_eventos);
 
-        imprimir_lista(lista);
+        if(imprimir)
+            imprimir_lista(lista);
 
         correr_simulacion(lista);
 
-        // Una vez mostrada realizada la simulaci�n, se libera la memoria
         liberar_memoria(lista);
 
-        valido = false;
+        printf("Desea realizar otra simulacion?\n");
 
-        while (!valido)
+        if (recibir_entrada() == 'N')
         {
-            printf("Desea realizar otra simulacion? (S/N)\n");
-            scanf("%c", &c);
-            scanf("%c", &enter); // se come el \n
-
-            c = toupper(c);
-
-            if (c == 'N')
-            {
-                continuar = false;
-                valido = true;
-            }
-            else if (c == 'S')
-            {
-                continuar = true;
-                valido = true;
-            }
-            else
-            {
-                valido = false;
-                printf("Opcion invalida, intente otra vez:\n");
-            }
+            break;
         }
     }
     return EXIT_SUCCESS;
