@@ -45,11 +45,11 @@ void imprimir_lista(Evento *lista)
 
 void liberar_memoria(Evento *evento)
 {
-    /*
-     * Función recursiva que toma como parámetro un puntero a un evento de la lista,
-     * si no es el último se llama a si misma pasando como parámetro el puntero al próximo elemento.
-     * De esta forma se va liberando la memoria desde el ultimo elemento al primero.
-     */
+    /**
+      Función recursiva que toma como parámetro un puntero a un evento de la lista,
+      si no es el último se llama a si misma pasando como parámetro el puntero al próximo elemento.
+      De esta forma se va liberando la memoria desde el ultimo elemento al primero.
+    **/
 
     if (evento->sig != NULL)
     {
@@ -160,6 +160,7 @@ char recibir_entrada()
         scanf("%c", &c);
         getchar();
 
+        // Para que tome tanto mayúsculas como minúsculas válidas
         c = toupper(c);
 
         if (c == 'N' || c == 'S')
