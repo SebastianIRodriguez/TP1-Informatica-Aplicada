@@ -32,8 +32,8 @@ typedef enum
 void imprimir_lista(Evento *lista)
 {
     /**
-    * Imprime la lista de eventos generados con los valores de los sensores asociados a cada evento.
-    **/
+     * Imprime la lista de eventos generados con los valores de los sensores asociados a cada evento.
+     **/
     Evento *p = lista;
     while (p->sig != NULL)
     {
@@ -71,6 +71,10 @@ void correr_simulacion(Evento *eventos)
     Evento *p = eventos;
     Estado estado_actual = ALTA_VELOCIDAD;
 
+    printf("Cinta a Alta Velocidad: \t\t\t C1 = 1 C0 = 1\t\trequiere_ensanche = 0\n");
+    requiere_ensanche = 0;
+    cinta = 3;
+
     while (p->sig != NULL)
     {
         // Se detecta vela
@@ -97,7 +101,10 @@ void correr_simulacion(Evento *eventos)
         else if (p->s1 == 0 && p->s2 == 0 && estado_actual == BAJA_VELOCIDAD_ENSANCHADO)
         {
             // Cortar la simulacion
-            printf("La vela llego al final de la cinta\n");
+            printf("La vela abandono el puesto de control\n");
+            printf("Cinta a Alta Velocidad: \t\t\t C1 = 1 C0 = 1\t\trequiere_ensanche = 0\n");
+            requiere_ensanche = 0;
+            cinta = 3;
             break;
         }
         else
@@ -111,21 +118,18 @@ void correr_simulacion(Evento *eventos)
         {
 
         case BAJA_VELOCIDAD:
-            printf("Cinta a Baja Velocidad: \t\t\t C1 = 1 C2 = 0 \t\trequiere_ensanche = 0\n");
+            printf("Cinta a Baja Velocidad: \t\t\t C1 = 1 C0 = 0 \t\trequiere_ensanche = 0\n");
             requiere_ensanche = 0;
             cinta = 2;
             break;
 
         case BAJA_VELOCIDAD_ENSANCHADO:
-            printf("Cinta a Baja Velocidad, vela correcta:\t\t C1 = 1 C2 = 0 \t\trequiere_ensanche = 0\n");
+            printf("Cinta a Baja Velocidad, vela correcta:\t\t C1 = 1 C0 = 0 \t\trequiere_ensanche = 0\n");
             requiere_ensanche = 0;
             cinta = 2;
             break;
 
         case ALTA_VELOCIDAD:
-            printf("Cinta a alta velocidad: \t\t\t C1 = 1 C0 = 1\t\t requiere_ensanche = 0\n");
-            requiere_ensanche = 0;
-            cinta = 3;
             break;
 
         case DETENIDO_ENSANCHANDO:
@@ -187,7 +191,7 @@ Evento *crear_lista_eventos(int cantidad)
 
 int main(void)
 {
-	   setbuf(stdout,0);
+    setbuf(stdout, 0);
     int c_eventos;
     bool imprimir = false;
 
@@ -195,7 +199,7 @@ int main(void)
     srand(time(NULL));
 
     printf("\n\n\tBienvenido a la simulacion de fabrica de velas\n\n");
-    printf("  Desea ver las listas de eventos aleaotorios que se generen? \n  Aplica a todas las simulaciones\n\n");
+    printf("  Desea ver las listas de eventos aleatorios que se generen? \n  Aplica a todas las simulaciones\n\n");
 
     if (recibir_entrada() == 'S')
     {
@@ -212,7 +216,7 @@ int main(void)
 
         Evento *lista = crear_lista_eventos(c_eventos);
 
-        if(imprimir)
+        if (imprimir)
             imprimir_lista(lista);
 
         correr_simulacion(lista);
